@@ -3,6 +3,19 @@ assignments = []
 rows = 'ABCDEFGHI'
 cols = '123456789'
 
+def cross(A, B):
+    "Cross product of elements in A and elements in B."
+    return [s+t for s in A for t in B]
+
+boxes = cross(rows, cols)
+# print('boxes are {}'.format(boxes))
+row_units = [cross(r, cols) for r in rows]
+column_units = [cross(rows, c) for c in cols]
+square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
+unitlist = row_units + column_units + square_units
+units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
+peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
+
 
 def assign_value(values, box, value):
     """
@@ -30,19 +43,6 @@ def naked_twins(values):
 
     # Find all instances of naked twins
     # Eliminate the naked twins as possibilities for their peers
-
-def cross(A, B):
-    "Cross product of elements in A and elements in B."
-    return [s+t for s in A for t in B]
-
-
-boxes = cross(rows, cols)
-row_units = [cross(r, cols) for r in rows]
-column_units = [cross(rows, c) for c in cols]
-square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
-unitlist = row_units + column_units + square_units
-units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
-peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
 
 
 def grid_values(grid):
@@ -72,7 +72,7 @@ def display(values):
     Args:
         values(dict): The sudoku in dictionary form
     """
-    width = 1+max(len(values[s]) for s in boxes)
+    width = 1 + max( len(values[s]) for s in boxes )
     line = '+'.join(['-'*(width*3)]*3)
     for r in rows:
         print(''.join(values[r+c].center(width)+('|' if c in '36' else '')
@@ -86,7 +86,9 @@ def eliminate(values):
     for box in solved_values:
         digit = values[box]
         for peer in peers[box]:
-            values[peer] = values[peer].replace(digit,'')
+            # values[peer] = values[peer].replace(digit,'')
+            replaced_box = values[peer].replace(digit,'')
+            assign_value(values, peer, replaced_box)
     return values
 
 
@@ -95,7 +97,8 @@ def only_choice(values):
         for digit in '123456789':
             dplaces = [box for box in unit if digit in values[box]]
             if len(dplaces) == 1:
-                values[dplaces[0]] = digit
+                # values[dplaces[0]] = digit
+                assign_value(values, dplaces[0], digit)
     return values
 
 
@@ -123,7 +126,6 @@ def search(values):
     n, w = min( ( len(values[s]), s ) for s in boxes if len(values[s]) > 1 )
 
     # w = None
-
     # for s in boxes:
     #     length = len(values[s])
     #     if length > 1:
@@ -131,14 +133,11 @@ def search(values):
     #         w = s
     #         # print('first one length > 1 is {}'.format(w))
     #         break
-
     # for s in boxes:
     #     length = len(values[s])
     #     if length > 1:
     #         if s < w:
     #             w = s
-
-
     # print('n is {}'.format(n))
     # print('w is {}'.format(w))
 
@@ -160,6 +159,10 @@ def solve(grid):
     Returns:
         The dictionary representation of the final sudoku grid. False if no solution exists.
     """
+    values = grid_values(grid)
+    final_values = search(values)
+    return final_values
+
 
 
 if __name__ == '__main__':
