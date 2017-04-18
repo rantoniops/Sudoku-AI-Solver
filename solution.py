@@ -1,5 +1,8 @@
 assignments = []
 
+
+import collections
+
 rows = 'ABCDEFGHI'
 cols = '123456789'
 
@@ -13,8 +16,11 @@ row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
 unitlist = row_units + column_units + square_units
+# print('unitlist are {}'.format(unitlist))
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
+# print('units are {}'.format(units))
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
+# print('peers are {}'.format(peers))
 
 
 def assign_value(values, box, value):
@@ -43,6 +49,40 @@ def naked_twins(values):
 
     # Find all instances of naked twins
     # Eliminate the naked twins as possibilities for their peers
+    for unit in unitlist:
+        length_2_boxes = [box for box in unit if len(values[box]) == 2]
+        if len(length_2_boxes) > 1:
+            # print('length_2_boxes are {}'.format(length_2_boxes))
+            boxes_dict = {}
+            for box in length_2_boxes:
+                boxes_dict[box] = values[box]
+            # print('boxes_dict are {}'.format(boxes_dict))
+            duplicates = [item for item, count in collections.Counter(boxes_dict.values()).items() if count > 1]
+            # print('duplicates are {}'.format(duplicates))
+            # unit_dict = {}
+            # for box in unit:
+            #     unit_dict[box] = values[box]
+            # print('unit_dict are {}'.format(unit_dict))
+            for duplicate in duplicates:
+                for box in unit:
+                    for digit in duplicate:
+                        if digit in values[box] and duplicate != values[box]:
+                            # print('BOX BEFORE {}'.format(values[box]))
+                            values[box] = values[box].replace(digit,'')
+                            # print('BOX AFTER {}'.format(values[box]))
+    return values
+
+
+
+
+    # solved_values = [box for box in values.keys() if len(values[box]) == 1]
+    # for box in solved_values:
+    #     digit = values[box]
+    #     for peer in peers[box]:
+    #         # values[peer] = values[peer].replace(digit,'')
+    #         replaced_box = values[peer].replace(digit,'')
+    #         assign_value(values, peer, replaced_box)
+    # return values
 
 
 def grid_values(grid):
