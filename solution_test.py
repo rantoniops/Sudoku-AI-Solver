@@ -91,6 +91,7 @@ class TestDiagonalSudoku(unittest.TestCase):
                           'D8': '9', 'D9': '2', 'D6': '8', 'D7': '1', 'D4': '4', 'D5': '3', 'D2': '7', 'D3': '6',
                           'D1': '5'}
 
+
     def test_solve(self):
         self.assertEqual(solution.solve(self.diagonal_grid), self.solved_diag_sudoku)
 

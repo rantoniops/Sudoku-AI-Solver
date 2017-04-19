@@ -1,8 +1,17 @@
+
+
+# HI REVIEWER!
+# I BROUGHT IN ALL THE CODE WE USED IN THE UDACITY LECTURES, THE ONLY NEW CODE I WROTE IS THE NAKED_TWINS FUNCTION AND THE MODIFICATION
+# OF THE UNITSLIST IN ORDER TO ACCOMMODATE THE DIAGONALS
+
+
+# this is a library I use for checking duplicates
+import collections
+
 assignments = []
 
+# HERE I CREATE THE 2 NEW LISTS FOR THE DIAGONALS
 diagonals = [ [ 'A1', 'B2', 'C3', 'D4', 'E5', 'F6', 'G7', 'H8', 'I9' ] , [ 'A9', 'B8', 'C7', 'D6', 'E5', 'F4', 'G3', 'H2', 'I1' ] ]
-
-import collections
 
 rows = 'ABCDEFGHI'
 cols = '123456789'
@@ -12,17 +21,15 @@ def cross(A, B):
     return [s+t for s in A for t in B]
 
 boxes = cross(rows, cols)
-# print('boxes are {}'.format(boxes))
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
-# unitlist = row_units + column_units + square_units
+
+# HERE I ADD THE DIAGONALS TO THE UNITSLIST SO THEY ACT AS CONSTRAINTS IN THE REST OF THE CODE
 unitlist = row_units + column_units + square_units + diagonals
-# print('unitlist are {}'.format(unitlist))
+
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
-# print('units are {}'.format(units))
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
-# print('peers are {}'.format(peers))
 
 
 def assign_value(values, box, value):
@@ -48,48 +55,47 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
+    # THIS FUNCTION ACTUALLY WORKS OUT A LOT LIKE THE ELIMINATE FUNCTION
 
-    # Find all instances of naked twins
-    # Eliminate the naked twins as possibilities for their peers
+    # FIRST I LOOP THROUGH ALL THE UNITS
     for unit in unitlist:
+        # I SEPARATE ALL BOXES THAT HAVE 2 DIGITS IN THEIR VALUES
         length_2_boxes = [box for box in unit if len(values[box]) == 2]
-        if len(length_2_boxes) > 1:
-            # print('length_2_boxes are {}'.format(length_2_boxes))
+        # THEN I START SEARCHNG FOR DUPLICATES
+        if len(length_2_boxes) > 1: #FIRST I CHECK IF THERES MORE THAN ONE BOX WITH 2 DIGITS
             boxes_dict = {}
+            # BUT BEFORE I MAKE SURE TO MAP THE BOXES ORIGINAL VALUES BACK INTO THEM
             for box in length_2_boxes:
                 boxes_dict[box] = values[box]
-            # print('boxes_dict are {}'.format(boxes_dict))
+            # I EXTRACT THE VALUES WHICH ARE DUPLICATES
             duplicates = [item for item, count in collections.Counter(boxes_dict.values()).items() if count > 1]
-            # print('duplicates are {}'.format(duplicates))
-            # unit_dict = {}
-            # for box in unit:
-            #     unit_dict[box] = values[box]
-            # print('unit_dict are {}'.format(unit_dict))
             for duplicate in duplicates:
+                # INSTEAD OF GOING THORUGH ALL THE 20 PEERS, I ONLY SEARCH WITHIN ONE UNIT
                 for box in unit:
                     for digit in duplicate:
+                        # IF THE DIGITS ARE IN A NON-NAKED_TWIN BOX
                         if digit in values[box] and duplicate != values[box]:
-                            # print('BOX BEFORE {}'.format(values[box]))
+                            # I DELETE THE NUMBERS THEY HAVE FROM THE NAKED_TWINS
                             values[box] = values[box].replace(digit,'')
-                            # print('BOX AFTER {}'.format(values[box]))
     return values
 
 
-def check_diagonals(values):
-    diagonals_dicts = []
-    for diagonal in diagonals:
-        diagonals_dict = {}
-        for box in diagonal:
-            diagonals_dict[box] = values[box]
-        diagonals_dicts.append(diagonals_dict)
-    # print('diagonal_dicts are {}'.format(diagonals_dicts))
-    for diagonal_dictionary in diagonals_dicts:
-        duplicates = [item for item, count in collections.Counter(diagonal_dictionary.values()).items() if count > 1]
-        # print('diagonal duplicates are {}'.format(duplicates))
-        if len(duplicates) > 0:
-            return False
-        else:
-            return True
+# I ENDED UP NOT HAVING TO USE THIS FUNCTION
+# def check_diagonals(values):
+#     diagonals_dicts = []
+#     for diagonal in diagonals:
+#         diagonals_dict = {}
+#         for box in diagonal:
+#             diagonals_dict[box] = values[box]
+#         diagonals_dicts.append(diagonals_dict)
+#     # print('diagonal_dicts are {}'.format(diagonals_dicts))
+#     for diagonal_dictionary in diagonals_dicts:
+#         duplicates = [item for item, count in collections.Counter(diagonal_dictionary.values()).items() if count > 1]
+#         # print('diagonal duplicates are {}'.format(duplicates))
+#         if len(duplicates) > 0:
+#             return False
+#         else:
+#             return True
 
 
 
@@ -213,7 +219,6 @@ def solve(grid):
     """
     values = grid_values(grid)
     final_values = search(values)
-    check_diagonals(final_values)
     return final_values
 
 
@@ -234,6 +239,11 @@ def solve(grid):
 if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
     display(solve(diag_sudoku_grid))
+
+    print('NEW ONE FOR TESTING BELOW')
+
+    other_diagonal_grid = '9.1....8.8.5.7..4.2.4....6...7......5..............83.3..6......9................'
+    display(solve(other_diagonal_grid))
 
     # display(solved_diag_sudoku)
 
